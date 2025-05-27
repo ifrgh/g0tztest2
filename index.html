@@ -5,11 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>معلومات جهازك</title>
   <style>
-    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    body { font-family: sans-serif; background: #f0f0f0; padding: 20px; }
     h1 { text-align: center; }
-    .info { background: #fff; padding: 20px; border-radius: 8px; margin: auto; max-width: 700px; }
+    .info { background: #fff; padding: 20px; border-radius: 8px; max-width: 700px; margin: auto; }
     .info p { margin: 10px 0; }
-    .label { font-weight: bold; }
+    .label { font-weight: bold; color: #333; }
   </style>
 </head>
 <body>
@@ -23,39 +23,44 @@
       const output = document.getElementById("output");
       let infoHTML = "";
 
-      // Basic browser info
-      const ua = navigator.userAgent;
-      infoHTML += `<p><span class="label">User Agent:</span> ${ua}</p>`;
+      // User-Agent ومعلومات عامة
+      infoHTML += `<p><span class="label">User Agent:</span> ${navigator.userAgent}</p>`;
       infoHTML += `<p><span class="label">لغة المتصفح:</span> ${navigator.language}</p>`;
       infoHTML += `<p><span class="label">نظام التشغيل:</span> ${navigator.platform}</p>`;
-      infoHTML += `<p><span class="label">حجم الشاشة:</span> ${screen.width} x ${screen.height}</p>`;
+      infoHTML += `<p><span class="label">حجم الشاشة:</span> ${screen.width} × ${screen.height}</p>`;
       infoHTML += `<p><span class="label">نسبة تكبير الشاشة:</span> ${window.devicePixelRatio}</p>`;
       infoHTML += `<p><span class="label">التوقيت المحلي:</span> ${new Date().toLocaleString()}</p>`;
 
-      // Location by permission
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(pos => {
-          infoHTML += `<p><span class="label">الموقع الجغرافي (تقريبي):</span> ${pos.coords.latitude}, ${pos.coords.longitude}</p>`;
-          output.innerHTML = infoHTML;
-        }, () => {
-          infoHTML += `<p><span class="label">الموقع الجغرافي:</span> لم يتم السماح بالوصول</p>`;
-          output.innerHTML = infoHTML;
-        });
-      }
+      // الموقع الجغرافي (GPS)
+      let gpsHTML = `<p><span class="label">الموقع الجغرافي:</span> جاري تحديد الموقع...</p>`;
+      infoHTML += gpsHTML;
+      output.innerHTML = infoHTML;
 
-      // IP & ISP via external API
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const { latitude, longitude } = pos.coords;
+          const gps = `<p><span class="label">الموقع الجغرافي (GPS):</span> ${latitude}, ${longitude}</p>`;
+          output.innerHTML = infoHTML.replace(gpsHTML, gps);
+        },
+        (err) => {
+          const gps = `<p><span class="label">الموقع الجغرافي (GPS):</span> None</p>`;
+          output.innerHTML = infoHTML.replace(gpsHTML, gps);
+        }
+      );
+
+      // IP واسم الدولة والمدينة
       try {
         const res = await fetch("https://ipinfo.io/json?token=d814b20c4bf31e");
         const data = await res.json();
         infoHTML += `<p><span class="label">عنوان IP:</span> ${data.ip}</p>`;
         infoHTML += `<p><span class="label">البلد:</span> ${data.country}</p>`;
         infoHTML += `<p><span class="label">المدينة:</span> ${data.city}</p>`;
-        infoHTML += `<p><span class="label">مزود الخدمة (ISP):</span> ${data.org}</p>`;
+        infoHTML += `<p><span class="label">مزود الخدمة:</span> ${data.org}</p>`;
+        output.innerHTML = infoHTML;
       } catch {
-        infoHTML += `<p><span class="label">IP:</span> تعذر جلب العنوان</p>`;
+        infoHTML += `<p><span class="label">عنوان IP:</span> تعذر الحصول على البيانات</p>`;
+        output.innerHTML = infoHTML;
       }
-
-      output.innerHTML = infoHTML;
     }
 
     getDeviceInfo();
