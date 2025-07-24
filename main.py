@@ -1,15 +1,14 @@
-from flask import Flask, request, jsonify
+from flask import Flask
 import threading
 import time
 import requests
 
 app = Flask(__name__)
 
-# إعدادات القناة المشتركة
+# إعدادات القناة
 CHANNEL_ID = -1002752110921
 INVITE_LINK = "https://t.me/+YdnoVKBDrmAyY2Ex"
 
-# قائمة التوكنات
 BOT_TOKENS = [
     "7571433385:AAFvadyJycOn5225XuQf8VKc2kmAqryE_-Q",
     "8441633566:AAEUkexMZu37xiabBWou1pbz01_sLTuWoOE",
@@ -21,7 +20,7 @@ BOT_TOKENS = [
     "8345480045:AAGanpCB_MJjnJtNJNmcZPvE-pNvPovwjPM",
     "8384924383:AAF_yAeKh_2z_kkmG7LzhNba40eTtg32mPY",
     "8160383787:AAE4xCU1O-rAi2KiboztmBGGkV8-1oPGKyw",
-    "8112951576:AAEIJODtWhv8yelKJjzYMcmPeXDVQFAo5xY",
+    "8112951576:AAEIJODtWhv8yelKJjYMcmPeXDVQFAo5xY",
     "8268966159:AAEkW7gLghP7I_9bFFm1n4OJhbItOEjKkcQ",
     "7929665367:AAHCindnzXmk-HEX6VXqlFavDVG_kScZB2s",
     "8369928062:AAGI4zg4yPMmUhDtNPuHwThVGhyKPrNpSfw",
@@ -150,19 +149,14 @@ __________________________
 
     main()
 
-# تشغيل كل البوتات بصفة متزامنة في Thread منفصل
-for token in BOT_TOKENS:
-    threading.Thread(target=run_bot, args=(token,), daemon=True).start()
+def start_bots():
+    for token in BOT_TOKENS:
+        threading.Thread(target=run_bot, args=(token,), daemon=True).start()
 
-# منع البرنامج من الخروج
-while True:
-    time.sleep(60)
-
-# ———————————————
-# الآن صفحة ويب بسيطة للـ keep-alive
 @app.route('/')
 def home():
     return "بوتاتك شغالة تمام! 🚀"
 
 if __name__ == "__main__":
-    threading.Thread(target=app.run, kwargs={"host": "0.0.0.0", "port": 8080}).start()
+    start_bots()
+    app.run(host='0.0.0.0', port=8080)
